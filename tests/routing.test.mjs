@@ -52,3 +52,83 @@ test("placeholder does not accept form submissions", async () => {
   assert.equal(response.status, 405);
   assert.equal(response.headers.get("Allow"), "GET, HEAD");
 });
+
+for (const origin of [
+  "http://lukaszszukalski.pl",
+  "http://www.lukaszszukalski.pl",
+  "https://www.lukaszszukalski.pl",
+]) {
+  test(`BASKET canonical host and HTTPS: ${origin}`, async () => {
+    const query = "?utm_source=zakladka&name=%C5%81ukasz&x=1";
+    for (const path of ["/basket", "/basket/", "/basket/index.html"]) {
+      const response = await worker.fetch(new Request(`${origin}${path}${query}`), env);
+      assert.equal(response.status, 308);
+      assert.equal(response.headers.get("Location"), `https://lukaszszukalski.pl/basket/${query}`);
+      assert.equal(response.headers.get("Cache-Control"), "no-store");
+      assert.equal(await response.text(), "");
+
+      // Following the canonical redirect must serve the page, not redirect again.
+      const final = await worker.fetch(new Request(response.headers.get("Location")), env);
+      assert.equal(final.status, 200);
+      assert.equal(final.headers.get("Location"), null);
+      assert.equal(await final.text(), "ASSET:/basket/");
+    }
+  });
+
+  test(`BASKET asset paths survive host canonicalization: ${origin}`, async () => {
+    for (const path of [
+      "/basket/basket.css",
+      "/basket/assets/lukasz-basket-mobile.webp",
+      "/basket/assets/fonts/basket-font-9.woff2",
+      "/basket/assets/Lukasz-Szukalski.vcf",
+    ]) {
+      const query = "?v=2&campaign=BASKET";
+      const response = await worker.fetch(new Request(`${origin}${path}${query}`), {
+        ASSETS: { fetch: async () => { throw new Error("Asset binding called before canonical redirect"); } },
+      });
+      assert.equal(response.status, 308);
+      const target = `https://lukaszszukalski.pl${path}${query}`;
+      assert.equal(response.headers.get("Location"), target);
+
+      let requestedAssetUrl;
+      const final = await worker.fetch(new Request(target), {
+        ASSETS: { fetch: async (request) => {
+          requestedAssetUrl = request.url;
+          return new Response("asset bytes", { status: 200 });
+        } },
+      });
+      assert.equal(requestedAssetUrl, target);
+      assert.equal(final.status, 200);
+      assert.equal(final.headers.get("Location"), null);
+      assert.equal(await final.text(), "asset bytes");
+    }
+  });
+}
+
+test("HEAD BASKET on HTTP www redirects without a body", async () => {
+  const response = await worker.fetch(new Request("http://www.lukaszszukalski.pl/basket/index.html?ref=book", { method: "HEAD" }), env);
+  assert.equal(response.status, 308);
+  assert.equal(response.headers.get("Location"), "https://lukaszszukalski.pl/basket/?ref=book");
+  assert.equal(await response.text(), "");
+});
+
+test("BASKET canonicalization does not rewrite other sections or unrelated hosts", async () => {
+  for (const name of ["ofe", "rekomendacje", "seeyoulater"]) {
+    const requestUrl = `http://www.lukaszszukalski.pl/${name}?q=1`;
+    const response = await worker.fetch(new Request(requestUrl), env);
+    assert.equal(response.status, 308);
+    assert.equal(response.headers.get("Location"), `http://www.lukaszszukalski.pl/${name}/?q=1`);
+  }
+  const unrelated = await worker.fetch(new Request("https://preview.example/basket?ref=test"), env);
+  assert.equal(unrelated.status, 308);
+  assert.equal(unrelated.headers.get("Location"), "https://preview.example/basket/?ref=test");
+});
+
+test("www origin paths and similarly named paths retain origin behavior", async () => {
+  for (const path of ["/", "/dozobaczenia/", "/rekomendacja/", "/basketball", "/Basket", "/basket-old/", "/assets/logo.png"]) {
+    const response = await worker.fetch(new Request(`http://www.lukaszszukalski.pl${path}?ref=old`), env);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), `ORIGIN:${path}`);
+    assert.equal(response.headers.get("Location"), null);
+  }
+});
