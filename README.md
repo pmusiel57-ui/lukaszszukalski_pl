@@ -1,1 +1,120 @@
-# lukaszszukalski_pl
+# lukaszszukalski.pl
+
+Kod stron dla domeny **lukaszszukalski.pl**, przygotowany dla repozytorium `pmusiel57-ui/lukaszszukalski_pl`. Każda podstrona ma osobny folder i własny plik `index.html`. Pliki przeznaczone do wyświetlania na stronie znajdują się w katalogu [public](public).
+
+## Gdzie edytować strony
+
+| Adres | Plik w repozytorium | Obecny stan |
+| --- | --- | --- |
+| `lukaszszukalski.pl/` | [public/index.html](public/index.html) | Rezerwowy szkic strony głównej |
+| `lukaszszukalski.pl/basket/` | [public/basket/index.html](public/basket/index.html) | Strona tymczasowa na Cloudflare |
+| `lukaszszukalski.pl/dozobaczenia/` | [public/dozobaczenia/index.html](public/dozobaczenia/index.html) | Rezerwowy szkic; istniejąca strona działa na dotychczasowym hostingu |
+| `lukaszszukalski.pl/rekomendacje/` | [public/rekomendacje/index.html](public/rekomendacje/index.html) | Strona tymczasowa na Cloudflare |
+| `lukaszszukalski.pl/seeyoulater/` | [public/seeyoulater/index.html](public/seeyoulater/index.html) | Strona tymczasowa na Cloudflare |
+| `lukaszszukalski.pl/ofe/` | [public/ofe/index.html](public/ofe/index.html) | Strona tymczasowa na Cloudflare |
+
+**Pliki strony głównej i `/dozobaczenia/` są szkicami, a nie kopią dotychczasowych stron.** Obecne treści pod tymi adresami pozostają na wcześniejszym serwerze. Stary adres `/rekomendacja/` (liczba pojedyncza) również pozostaje na wcześniejszym serwerze; `/rekomendacje/` to osobna, nowa podstrona.
+
+## Pozostałe pliki
+
+| Plik | Przeznaczenie |
+| --- | --- |
+| [src/worker.mjs](src/worker.mjs) | Kod Workera obsługującego cztery nowe podstrony |
+| [cloudflare.config.ts](cloudflare.config.ts) | Konfiguracja Workera dla Cloudflare CLI (`cf`) |
+| [vite.config.ts](vite.config.ts) | Budowanie kodu i dołączanie wszystkich plików z `public` |
+| [package.json](package.json) | Polecenia projektu i wersje narzędzi |
+| [deployment.json](deployment.json) | Opis wdrożenia przez Cloudflare API, ustawień zasobów i tras |
+| [deployment-receipt.json](deployment-receipt.json) | Zapis identyfikatorów i zakresu wdrożenia z 18 listopada 2026 r. |
+| [tests/routing.test.mjs](tests/routing.test.mjs) | Testy tras, przekierowań oraz zachowania dotychczasowego hostingu |
+| [README.txt](README.txt) | Instrukcja dołączona do pierwotnej paczki projektu |
+
+## Przeglądanie i edycja na GitHubie
+
+1. Otwórz folder `public`.
+2. Otwórz folder wybranej podstrony, np. `basket`.
+3. Kliknij `index.html`, aby zobaczyć kod.
+4. Użyj przycisku edycji pliku i zapisz zmianę jako commit.
+
+Repozytorium przechowuje źródła oraz historię zmian. **Zapisanie commita nie publikuje obecnie zmian na Cloudflare.** Automatyczne wdrażanie z GitHuba nie zostało skonfigurowane.
+
+## Hosting i wdrożenie
+
+Projekt Cloudflare Workers ma nazwę `lukaszszukalski-strony`. Pliki z `public` są publikowane jako Workers Static Assets z powiązaniem `ASSETS`.
+
+Worker jest podłączony wyłącznie do czterech tras:
+
+- `lukaszszukalski.pl/basket*`
+- `lukaszszukalski.pl/rekomendacje*`
+- `lukaszszukalski.pl/seeyoulater*`
+- `lukaszszukalski.pl/ofe*`
+
+Kod dodatkowo sprawdza granice nazw podstron, dzięki czemu np. `/basketball` nie jest traktowane jako `/basket/`. Pozostałe adresy obsługuje dotychczasowy serwer. Adres `workers.dev` jest wyłączony. Istniejące rekordy DNS i ustawienia poczty zostały zachowane.
+
+`deployment.json` jest opisem konfiguracji użytej przy wdrożeniu przez API. **Nie jest plikiem konfiguracyjnym CLI ani samodzielnym skryptem wdrożeniowym.** Wartość `main_module: "worker.mjs"` oznacza nazwę modułu przesyłanego do API; plik źródłowy znajduje się w `src/worker.mjs`.
+
+Do dalszej pracy z CLI służy `cloudflare.config.ts`. Zachowuje nazwę istniejącego Workera, cztery obecne trasy oraz ustawienia Static Assets i obserwowalności. Vite pobiera pliki statyczne z katalogu `public`.
+
+## Publikowanie z GitHuba
+
+Docelowe połączenie: repozytorium `pmusiel57-ui/lukaszszukalski_pl`, gałąź `main`, istniejący Worker `lukaszszukalski-strony`. Połączenie Workers Builds wymaga udostępnienia repozytorium aplikacji Cloudflare na GitHubie oraz skonfigurowania odpowiedniego tokenu wdrożeniowego w Cloudflare.
+
+Planowane ustawienia Workers Builds:
+
+| Ustawienie | Wartość |
+| --- | --- |
+| Gałąź produkcyjna | `main` |
+| Katalog projektu | `/` |
+| Polecenie budowania | `npm test && npm run build` |
+| Polecenie wdrożenia | `npm run deploy -- --prebuilt` |
+| Node.js | Wersja wskazana w `.node-version` |
+
+Te ustawienia są przygotowaniem do połączenia. Sam plik konfiguracyjny nie włącza automatycznego wdrażania.
+
+## Praca lokalna
+
+Użyj wersji Node.js zapisanej w `.node-version`, a następnie zainstaluj zależności:
+
+```sh
+npm ci
+```
+
+Polecenia projektu:
+
+- `npm test` — testy obecnego routingu.
+- `npm run build` — budowanie plików do wdrożenia.
+- `npm run check:deploy` — przygotowanie i walidacja wdrożenia bez publikacji.
+- `npm run dev` — lokalny podgląd projektu.
+- `npm run deploy` — publikacja do istniejącego Workera; wymaga uwierzytelnienia Cloudflare.
+
+Pliki środowiskowe i poświadczenia nie należą do repozytorium. Dane potrzebne do wdrażania należy skonfigurować w Cloudflare lub lokalnym środowisku narzędzi.
+
+## Dodawanie docelowej treści
+
+1. Zastąp odpowiedni plik `public/<nazwa>/index.html` docelowym HTML.
+2. Grafiki, CSS i JavaScript umieszczaj wewnątrz folderu tej podstrony, np. `public/basket/assets/portret.webp`. W HTML używaj odwołań względnych, np. `./assets/portret.webp`. Globalne `/assets/` nie jest objęte obecnymi trasami Workera.
+3. Szkice mają `noindex` zarówno w HTML, jak i w nagłówku `X-Robots-Tag` ustawianym przez Workera. Przy publikacji gotowej strony dostosuj obie warstwy dla tej konkretnej podstrony, zachowując `noindex` dla pozostałych szkiców.
+4. Przy kolejnym wdrożeniu manifest Static Assets musi zawierać wszystkie potrzebne pliki projektu, również te bez zmian.
+5. Wdróż kod i komplet zasobów do istniejącego Workera, a następnie sprawdź adres podstrony, przekierowania i grafiki.
+
+Przeniesienie strony głównej lub `/dozobaczenia/` wymaga najpierw ich kompletnych docelowych plików i świadomego rozszerzenia konfiguracji tras.
+
+## Testy
+
+W katalogu projektu uruchom:
+
+```sh
+node --test tests/routing.test.mjs
+```
+
+Zestaw zawiera 19 testów i nie wymaga instalacji dodatkowych pakietów.
+
+## Wycofanie czterech nowych tras
+
+Usuń wyłącznie cztery Worker Routes wymienione w `deployment.json`. Ruch do tych adresów ponownie trafi do poprzedniego serwera. Nie wymaga to usuwania rekordów DNS domeny.
+
+## Dokumentacja Cloudflare
+
+- [Worker Routes](https://developers.cloudflare.com/workers/configuration/routing/routes/)
+- [Direct upload of Static Assets](https://developers.cloudflare.com/workers/static-assets/direct-upload/)
+- [Obsługa adresów HTML](https://developers.cloudflare.com/workers/static-assets/routing/advanced/html-handling/)
+- [Workers Builds i integracja z Git](https://developers.cloudflare.com/workers/ci-cd/builds/)

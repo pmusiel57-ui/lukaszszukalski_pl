@@ -1,0 +1,19 @@
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+
+# Local tooling and temporary output
+node_modules/
+.wrangler/
+.cloudflare/
+dist/
+coverage/
+*.log
+*.zip
+.DS_Store
+Thumbs.db

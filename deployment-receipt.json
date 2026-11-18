@@ -1,0 +1,74 @@
+{
+  "domain": "lukaszszukalski.pl",
+  "created_at": "2026-11-18T09:45:32.78711Z",
+  "worker": "lukaszszukalski-strony",
+  "cloudflare_deployment_id": "7777d8e2-e994-4353-a5b7-b5df15d13dc0",
+  "assets": [
+    {
+      "path": "/basket/index.html",
+      "hash": "7bb89a5933ecc5151f3ee45942799b6d",
+      "size": 1739
+    },
+    {
+      "path": "/dozobaczenia/index.html",
+      "hash": "05edeeaa902230a149035799d44fcc83",
+      "size": 1773
+    },
+    {
+      "path": "/index.html",
+      "hash": "5c20c69387259fface01b3539444c990",
+      "size": 1775
+    },
+    {
+      "path": "/ofe/index.html",
+      "hash": "43df27aea39f3cab24ff040425b76168",
+      "size": 1736
+    },
+    {
+      "path": "/rekomendacje/index.html",
+      "hash": "b5c32d07abab8fbaf0c4986b2d8b9632",
+      "size": 1745
+    },
+    {
+      "path": "/seeyoulater/index.html",
+      "hash": "8553ecb89ae91199945f0f25454f70d3",
+      "size": 1746
+    }
+  ],
+  "routes": [
+    {
+      "id": "9b694c99d1ab4ffbaa9d5fa7f1c88369",
+      "pattern": "lukaszszukalski.pl/basket*",
+      "script": "lukaszszukalski-strony",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "8fbf15b771f14cabb8e38b62308a8a9c",
+      "pattern": "lukaszszukalski.pl/seeyoulater*",
+      "script": "lukaszszukalski-strony",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "6d5c78ceb096492e8e072703582124bd",
+      "pattern": "lukaszszukalski.pl/rekomendacje*",
+      "script": "lukaszszukalski-strony",
+      "request_limit_fail_open": false
+    },
+    {
+      "id": "8b3104459b0d457fa230a87e2a3a8a34",
+      "pattern": "lukaszszukalski.pl/ofe*",
+      "script": "lukaszszukalski-strony",
+      "request_limit_fail_open": false
+    }
+  ],
+  "preserved_origin_paths": [
+    "/",
+    "/dozobaczenia/",
+    "/rekomendacja/"
+  ],
+  "dns_changes": false,
+  "source_tests_passed": 19,
+  "cloudflare_version_id": "c6714c95-129a-42ef-be29-b6d46882edf3",
+  "cloudflare_certificate_status": "active",
+  "deployment_percentage": 100
+}
