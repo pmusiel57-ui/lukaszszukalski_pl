@@ -18,9 +18,9 @@
 
 ## Obecny zakres produkcyjny
 
-Cloudflare Worker `lukaszszukalski-strony` obsługuje cztery sekcje: `/basket/`, `/rekomendacje/`, `/seeyoulater/` i `/ofe/`.
+Cloudflare Worker `lukaszszukalski-strony` obsługuje stronę główną, `/obszary/`, `/kontakt/`, `/basket/`, `/rekomendacje/`, `/seeyoulater/` i `/ofe/`.
 
-Pliki strony głównej oraz `/dozobaczenia/` są rezerwowymi szkicami. Działające strony pod tymi adresami oraz stary adres `/rekomendacja/` nadal obsługuje wcześniejszy hosting. Migracja wymaga docelowej treści i odpowiedniej zmiany routingu; sama edycja szkicu w repozytorium nie zmieni tych stron produkcyjnych.
+Plik `/dozobaczenia/` jest rezerwowym szkicem. Tę ścieżkę, stary adres `/rekomendacja/` i inne ścieżki spoza listy nadal obsługuje wcześniejszy hosting. Trasa `lukaszszukalski.pl/*` pozwala obsłużyć stronę główną z parametrami zapytania. Worker przekazuje niewymienione ścieżki do dotychczasowego serwera.
 
 Przy zmianach pojedynczej sekcji zachowuj pozostałe trasy i dotychczasowe treści. Nie rozszerzaj zakresu routingu na całą domenę w ramach zwykłej edycji jednej podstrony.
 

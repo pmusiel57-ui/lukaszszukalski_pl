@@ -1,6 +1,7 @@
-// The existing homepage, meeting page and all other origin paths remain on MSERWIS.
+// Keep unlisted paths on the existing origin.
 // Add a section here only when its content is ready and its Worker Route is intended.
-export const managedSections = ["basket", "rekomendacje", "seeyoulater", "ofe"];
+export const managedSections = ["basket", "rekomendacje", "seeyoulater", "ofe", "obszary", "kontakt"];
+const indexableSections = new Set(["basket", "obszary", "kontakt"]);
 
 export default {
   async fetch(request, env) {
@@ -9,11 +10,13 @@ export default {
       (name) => url.pathname === `/${name}` || url.pathname.startsWith(`/${name}/`),
     );
 
+    const isHomepage = url.pathname === "/" || url.pathname === "/index.html";
+
     // Workers Routes send this subrequest to the existing origin, without recursion.
-    if (!section) return fetch(request);
+    if (!isHomepage && !section) return fetch(request);
 
     const commonHeaders = {
-      "X-Robots-Tag": section === "basket" ? "index, follow" : "noindex, nofollow",
+      "X-Robots-Tag": isHomepage || indexableSections.has(section) ? "index, follow" : "noindex, nofollow",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Cache-Control": "no-store",
@@ -36,7 +39,9 @@ export default {
       canonicalUrl.hostname = "lukaszszukalski.pl";
       canonicalUrl.port = "";
     }
-    if (url.pathname === `/${section}` || url.pathname === `/${section}/index.html`) {
+    if (isHomepage) {
+      canonicalUrl.pathname = "/";
+    } else if (url.pathname === `/${section}` || url.pathname === `/${section}/index.html`) {
       canonicalUrl.pathname = `/${section}/`;
     }
     if (canonicalUrl.toString() !== url.toString()) {

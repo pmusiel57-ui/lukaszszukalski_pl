@@ -8,7 +8,7 @@ globalThis.fetch = async (request) => new Response(`ORIGIN:${new URL(request.url
 const env = {
   ASSETS: { fetch: async (request) => {
     const path = new URL(request.url).pathname;
-    const valid = ["/basket/", "/rekomendacje/", "/seeyoulater/", "/ofe/"];
+    const valid = ["/", "/basket/", "/rekomendacje/", "/seeyoulater/", "/ofe/", "/obszary/", "/kontakt/", "/kontakt/ustawienia.js"];
     return new Response(valid.includes(path) ? `ASSET:${path}` : "Not found", {
       status: valid.includes(path) ? 200 : 404,
       headers: { "Content-Type": "text/html; charset=utf-8" },
@@ -16,19 +16,19 @@ const env = {
   } },
 };
 
-for (const path of ["/", "/index.html", "/dozobaczenia/", "/rekomendacja/", "/rodo", "/basketball", "/oferta/", "/assets/logo.png"]) {
+for (const path of ["/dozobaczenia/", "/rekomendacja/", "/rodo", "/basketball", "/oferta/", "/assets/logo.png", "/kontakt-old/", "/obszary-test/"]) {
   test(`preserve origin ${path}`, async () => {
     const response = await worker.fetch(new Request(`https://lukaszszukalski.pl${path}`), env);
     assert.equal(await response.text(), `ORIGIN:${path}`);
     assert.equal(response.headers.get("X-Robots-Tag"), null);
   });
 }
-for (const name of ["basket", "rekomendacje", "seeyoulater", "ofe"]) {
+for (const name of ["basket", "rekomendacje", "seeyoulater", "ofe", "obszary", "kontakt"]) {
   test(`serve isolated section ${name}`, async () => {
     const response = await worker.fetch(new Request(`https://lukaszszukalski.pl/${name}/?utm_source=test`), env);
     assert.equal(response.status, 200);
     assert.equal(await response.text(), `ASSET:/${name}/`);
-    assert.equal(response.headers.get("X-Robots-Tag"), name === "basket" ? "index, follow" : "noindex, nofollow");
+    assert.equal(response.headers.get("X-Robots-Tag"), ["basket", "obszary", "kontakt"].includes(name) ? "index, follow" : "noindex, nofollow");
   });
   test(`canonical slash and UTM ${name}`, async () => {
     for (const path of [`/${name}`, `/${name}/index.html`]) {
@@ -125,10 +125,28 @@ test("BASKET canonicalization does not rewrite other sections or unrelated hosts
 });
 
 test("www origin paths and similarly named paths retain origin behavior", async () => {
-  for (const path of ["/", "/dozobaczenia/", "/rekomendacja/", "/basketball", "/Basket", "/basket-old/", "/assets/logo.png"]) {
+  for (const path of ["/dozobaczenia/", "/rekomendacja/", "/basketball", "/Basket", "/basket-old/", "/assets/logo.png"]) {
     const response = await worker.fetch(new Request(`http://www.lukaszszukalski.pl${path}?ref=old`), env);
     assert.equal(response.status, 200);
     assert.equal(await response.text(), `ORIGIN:${path}`);
     assert.equal(response.headers.get("Location"), null);
   }
+});
+
+test("homepage serves campaign URLs and redirects the index alias", async () => {
+  const query = "?utm_source=homepage";
+  const home = await worker.fetch(new Request(`https://lukaszszukalski.pl/${query}`), env);
+  assert.equal(home.status, 200);
+  assert.equal(await home.text(), "ASSET:/");
+  assert.equal(home.headers.get("X-Robots-Tag"), "index, follow");
+
+  const alias = await worker.fetch(new Request(`https://lukaszszukalski.pl/index.html${query}`), env);
+  assert.equal(alias.status, 308);
+  assert.equal(alias.headers.get("Location"), `https://lukaszszukalski.pl/${query}`);
+});
+
+test("serve contact settings from the same section", async () => {
+  const response = await worker.fetch(new Request("https://lukaszszukalski.pl/kontakt/ustawienia.js"), env);
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), "ASSET:/kontakt/ustawienia.js");
 });

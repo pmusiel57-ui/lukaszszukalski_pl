@@ -17,6 +17,11 @@ export default defineConfig({
     workersDev: false,
     previewUrls: false,
     triggers: [
+      // The wildcard includes query strings on the homepage. The Worker forwards unlisted paths.
+      triggers.fetch({
+        pattern: "lukaszszukalski.pl/*",
+        zone: "lukaszszukalski.pl",
+      }),
       triggers.fetch({
         pattern: "lukaszszukalski.pl/basket*",
         zone: "lukaszszukalski.pl",

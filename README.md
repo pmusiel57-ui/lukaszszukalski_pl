@@ -6,20 +6,22 @@ Kod stron dla domeny **lukaszszukalski.pl**, przygotowany dla repozytorium `pmus
 
 | Adres | Plik w repozytorium | Obecny stan |
 | --- | --- | --- |
-| `lukaszszukalski.pl/` | [public/index.html](public/index.html) | Rezerwowy szkic strony głównej |
+| `lukaszszukalski.pl/` | [public/index.html](public/index.html) | Strona główna na Cloudflare |
+| `lukaszszukalski.pl/obszary/` | [public/obszary/index.html](public/obszary/index.html) | Obszary doradztwa |
+| `lukaszszukalski.pl/kontakt/` | [public/kontakt/index.html](public/kontakt/index.html) | Kontakt |
 | `lukaszszukalski.pl/basket/` | [public/basket/index.html](public/basket/index.html) | Strona tymczasowa na Cloudflare |
 | `lukaszszukalski.pl/dozobaczenia/` | [public/dozobaczenia/index.html](public/dozobaczenia/index.html) | Rezerwowy szkic; istniejąca strona działa na dotychczasowym hostingu |
 | `lukaszszukalski.pl/rekomendacje/` | [public/rekomendacje/index.html](public/rekomendacje/index.html) | Strona tymczasowa na Cloudflare |
 | `lukaszszukalski.pl/seeyoulater/` | [public/seeyoulater/index.html](public/seeyoulater/index.html) | Strona tymczasowa na Cloudflare |
 | `lukaszszukalski.pl/ofe/` | [public/ofe/index.html](public/ofe/index.html) | Strona tymczasowa na Cloudflare |
 
-**Pliki strony głównej i `/dozobaczenia/` są szkicami, a nie kopią dotychczasowych stron.** Obecne treści pod tymi adresami pozostają na wcześniejszym serwerze. Stary adres `/rekomendacja/` (liczba pojedyncza) również pozostaje na wcześniejszym serwerze; `/rekomendacje/` to osobna, nowa podstrona.
+Plik `public/dozobaczenia/index.html` to szkic. Treść produkcyjną pod `/dozobaczenia/` obsługuje wcześniejszy serwer. Stary adres `/rekomendacja/` (liczba pojedyncza) również pozostaje na wcześniejszym serwerze; `/rekomendacje/` to osobna, nowa podstrona.
 
 ## Pozostałe pliki
 
 | Plik | Przeznaczenie |
 | --- | --- |
-| [src/worker.mjs](src/worker.mjs) | Kod Workera obsługującego cztery nowe podstrony |
+| [src/worker.mjs](src/worker.mjs) | Kod Workera obsługującego routing i pliki statyczne |
 | [cloudflare.config.ts](cloudflare.config.ts) | Konfiguracja Workera dla Cloudflare CLI (`cf`) |
 | [vite.config.ts](vite.config.ts) | Budowanie kodu i dołączanie wszystkich plików z `public` |
 | [package.json](package.json) | Polecenia projektu i wersje narzędzi |
@@ -41,8 +43,10 @@ Repozytorium przechowuje źródła oraz historię zmian. **Zapisanie commita na 
 
 Projekt Cloudflare Workers ma nazwę `lukaszszukalski-strony`. Pliki z `public` są publikowane jako Workers Static Assets z powiązaniem `ASSETS`.
 
-Worker jest podłączony wyłącznie do czterech tras:
+Worker jest podłączony do następujących tras:
 
+- `lukaszszukalski.pl/*` — strona główna, `/obszary/` i `/kontakt/`
+- `www.lukaszszukalski.pl/basket*`
 - `lukaszszukalski.pl/basket*`
 - `lukaszszukalski.pl/rekomendacje*`
 - `lukaszszukalski.pl/seeyoulater*`
@@ -52,7 +56,7 @@ Kod dodatkowo sprawdza granice nazw podstron, dzięki czemu np. `/basketball` ni
 
 `deployment.json` jest opisem konfiguracji użytej przy wdrożeniu przez API. **Nie jest plikiem konfiguracyjnym CLI ani samodzielnym skryptem wdrożeniowym.** Wartość `main_module: "worker.mjs"` oznacza nazwę modułu przesyłanego do API; plik źródłowy znajduje się w `src/worker.mjs`.
 
-Do dalszej pracy z CLI służy `cloudflare.config.ts`. Zachowuje nazwę istniejącego Workera, cztery obecne trasy oraz ustawienia Static Assets i obserwowalności. Vite pobiera pliki statyczne z katalogu `public`.
+Do dalszej pracy z CLI służy `cloudflare.config.ts`. Określa nazwę Workera, trasy oraz ustawienia Static Assets i obserwowalności. Vite pobiera pliki statyczne z katalogu `public`.
 
 ## Publikowanie z GitHuba
 
@@ -76,7 +80,7 @@ Podaj adres podstrony i opisz oczekiwaną zmianę, np. „Na `/basket/` zmień n
 
 GitHub jest miejscem przechowywania źródeł. Cloudflare buduje i publikuje ich wdrożoną kopię; ręczne kopiowanie plików przez panel nie jest potrzebne.
 
-Obecne trasy produkcyjne obejmują `/basket/`, `/rekomendacje/`, `/seeyoulater/` i `/ofe/`. Pliki rezerwowe strony głównej oraz `/dozobaczenia/` również są w repozytorium, ale ich edycja nie zastępuje stron działających na dotychczasowym hostingu. Ich przeniesienie wymaga docelowych treści i rozszerzenia konfiguracji tras.
+Kod Workera zawiera listę sekcji obsługiwanych przez Cloudflare. Przeniesienie `/dozobaczenia/` wymaga docelowych treści i dodania tej sekcji do listy.
 
 ## Praca lokalna
 
@@ -104,8 +108,6 @@ Pliki środowiskowe i poświadczenia nie należą do repozytorium. Dane potrzebn
 4. Przy kolejnym wdrożeniu manifest Static Assets musi zawierać wszystkie potrzebne pliki projektu, również te bez zmian.
 5. Wdróż kod i komplet zasobów do istniejącego Workera, a następnie sprawdź adres podstrony, przekierowania i grafiki.
 
-Przeniesienie strony głównej lub `/dozobaczenia/` wymaga najpierw ich kompletnych docelowych plików i świadomego rozszerzenia konfiguracji tras.
-
 ## Testy
 
 W katalogu projektu uruchom:
@@ -114,11 +116,7 @@ W katalogu projektu uruchom:
 node --test tests/routing.test.mjs
 ```
 
-Zestaw zawiera 19 testów i nie wymaga instalacji dodatkowych pakietów.
-
-## Wycofanie czterech nowych tras
-
-Usuń wyłącznie cztery Worker Routes wymienione w `deployment.json`. Ruch do tych adresów ponownie trafi do poprzedniego serwera. Nie wymaga to usuwania rekordów DNS domeny.
+Testy routingu działają bez instalacji dodatkowych pakietów.
 
 ## Dokumentacja Cloudflare
 
