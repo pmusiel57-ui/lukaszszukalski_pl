@@ -18,7 +18,7 @@
 
 ## Obecny zakres produkcyjny
 
-Cloudflare Worker `lukaszszukalski-strony` obsługuje stronę główną, `/obszary/`, `/kontakt/`, `/basket/`, `/rekomendacje/`, `/seeyoulater/` `/ofe/` i `/dozobaczenia/`.
+Cloudflare Worker `lukaszszukalski-strony` obsługuje stronę główną, `/obszary/`, `/kontakt/`, `/basket/`, `/rekomendacje/`, `/seeyoulater/`, `/ofe/` i `/dozobaczenia/`.
 
 Polityka prywatności spotkania jest dostępna pod `/dozobaczenia/rodo/`. Stary adres `/rekomendacja/` i inne ścieżki spoza listy nadal obsługuje wcześniejszy hosting. Trasa `lukaszszukalski.pl/*` pozwala obsłużyć stronę główną z parametrami zapytania. Worker przekazuje niewymienione ścieżki do dotychczasowego serwera.
 
