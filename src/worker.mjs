@@ -25,11 +25,24 @@ export default {
       });
     }
 
+    // The BASKET campaign has one public URL, including when a browser adds www
+    // or opens an HTTP bookmark. Preserve asset paths and campaign query strings.
+    const canonicalUrl = new URL(url);
+    if (
+      section === "basket" &&
+      ["lukaszszukalski.pl", "www.lukaszszukalski.pl"].includes(url.hostname)
+    ) {
+      canonicalUrl.protocol = "https:";
+      canonicalUrl.hostname = "lukaszszukalski.pl";
+      canonicalUrl.port = "";
+    }
     if (url.pathname === `/${section}` || url.pathname === `/${section}/index.html`) {
-      url.pathname = `/${section}/`;
+      canonicalUrl.pathname = `/${section}/`;
+    }
+    if (canonicalUrl.toString() !== url.toString()) {
       return new Response(null, {
         status: 308,
-        headers: { ...commonHeaders, Location: url.toString() },
+        headers: { ...commonHeaders, Location: canonicalUrl.toString() },
       });
     }
 
