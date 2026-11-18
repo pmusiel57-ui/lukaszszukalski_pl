@@ -65,7 +65,7 @@ Planowane ustawienia Workers Builds:
 | Gałąź produkcyjna | `main` |
 | Katalog projektu | `/` |
 | Polecenie budowania | `npm test && npm run build` |
-| Polecenie wdrożenia | `npm run deploy -- --prebuilt` |
+| Polecenie wdrożenia | `npm run deploy -- --prebuilt --mode production` |
 | Node.js | Wersja wskazana w `.node-version` |
 
 Te ustawienia są przygotowaniem do połączenia. Sam plik konfiguracyjny nie włącza automatycznego wdrażania.
