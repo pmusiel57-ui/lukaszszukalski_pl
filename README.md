@@ -35,7 +35,7 @@ Kod stron dla domeny **lukaszszukalski.pl**, przygotowany dla repozytorium `pmus
 3. Kliknij `index.html`, aby zobaczyć kod.
 4. Użyj przycisku edycji pliku i zapisz zmianę jako commit.
 
-Repozytorium przechowuje źródła oraz historię zmian. **Zapisanie commita nie publikuje obecnie zmian na Cloudflare.** Automatyczne wdrażanie z GitHuba nie zostało skonfigurowane.
+Repozytorium przechowuje źródła oraz historię zmian. **Zapisanie commita na gałęzi `main` automatycznie uruchamia testy, budowanie i wdrożenie do Cloudflare.** Połączenie Workers Builds jest włączone dla projektu `lukaszszukalski-strony`.
 
 ## Hosting i wdrożenie
 
@@ -56,9 +56,9 @@ Do dalszej pracy z CLI służy `cloudflare.config.ts`. Zachowuje nazwę istniej�
 
 ## Publikowanie z GitHuba
 
-Docelowe połączenie: repozytorium `pmusiel57-ui/lukaszszukalski_pl`, gałąź `main`, istniejący Worker `lukaszszukalski-strony`. Połączenie Workers Builds wymaga udostępnienia repozytorium aplikacji Cloudflare na GitHubie oraz skonfigurowania odpowiedniego tokenu wdrożeniowego w Cloudflare.
+Aktywne połączenie: repozytorium `pmusiel57-ui/lukaszszukalski_pl`, gałąź `main`, istniejący Worker `lukaszszukalski-strony`. Repozytorium jest dostępne integracji Cloudflare, a klucz wdrożeniowy pozostaje zapisany w Cloudflare.
 
-Planowane ustawienia Workers Builds:
+Ustawienia Workers Builds:
 
 | Ustawienie | Wartość |
 | --- | --- |
@@ -68,7 +68,15 @@ Planowane ustawienia Workers Builds:
 | Polecenie wdrożenia | `npm run deploy -- --prebuilt --mode production` |
 | Node.js | Wersja wskazana w `.node-version` |
 
-Te ustawienia są przygotowaniem do połączenia. Sam plik konfiguracyjny nie włącza automatycznego wdrażania.
+Cloudflare uruchamia wdrożenie po zmianie dowolnego pliku na `main`. Błąd testów lub budowania zatrzymuje proces przed krokiem publikacji. Automatyczne wdrażanie innych gałęzi i podglądy wersji są wyłączone.
+
+## Zmiany z ChatGPT
+
+Podaj adres podstrony i opisz oczekiwaną zmianę, np. „Na `/basket/` zmień nagłówek i opublikuj”. Przy edycji należy pobrać aktualny plik z GitHuba, zapisać zmianę w tym repozytorium na `main`, a następnie sprawdzić wynik Workers Builds i działającą podstronę.
+
+GitHub jest miejscem przechowywania źródeł. Cloudflare buduje i publikuje ich wdrożoną kopię; ręczne kopiowanie plików przez panel nie jest potrzebne.
+
+Obecne trasy produkcyjne obejmują `/basket/`, `/rekomendacje/`, `/seeyoulater/` i `/ofe/`. Pliki rezerwowe strony głównej oraz `/dozobaczenia/` również są w repozytorium, ale ich edycja nie zastępuje stron działających na dotychczasowym hostingu. Ich przeniesienie wymaga docelowych treści i rozszerzenia konfiguracji tras.
 
 ## Praca lokalna
 
