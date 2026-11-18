@@ -8,7 +8,7 @@ globalThis.fetch = async (request) => new Response(`ORIGIN:${new URL(request.url
 const env = {
   ASSETS: { fetch: async (request) => {
     const path = new URL(request.url).pathname;
-    const valid = ["/", "/basket/", "/rekomendacje/", "/seeyoulater/", "/ofe/", "/obszary/", "/kontakt/", "/kontakt/ustawienia.js"];
+    const valid = ["/", "/basket/", "/rekomendacje/", "/seeyoulater/", "/ofe/", "/obszary/", "/kontakt/", "/kontakt/ustawienia.js", "/dozobaczenia/", "/dozobaczenia/rodo/", "/dozobaczenia/assets/spotkanie.webp"];
     return new Response(valid.includes(path) ? `ASSET:${path}` : "Not found", {
       status: valid.includes(path) ? 200 : 404,
       headers: { "Content-Type": "text/html; charset=utf-8" },
@@ -16,14 +16,14 @@ const env = {
   } },
 };
 
-for (const path of ["/dozobaczenia/", "/rekomendacja/", "/rodo", "/basketball", "/oferta/", "/assets/logo.png", "/kontakt-old/", "/obszary-test/"]) {
+for (const path of ["/dozobaczenia-test/", "/rekomendacja/", "/rodo", "/basketball", "/oferta/", "/assets/logo.png", "/kontakt-old/", "/obszary-test/"]) {
   test(`preserve origin ${path}`, async () => {
     const response = await worker.fetch(new Request(`https://lukaszszukalski.pl${path}`), env);
     assert.equal(await response.text(), `ORIGIN:${path}`);
     assert.equal(response.headers.get("X-Robots-Tag"), null);
   });
 }
-for (const name of ["basket", "rekomendacje", "seeyoulater", "ofe", "obszary", "kontakt"]) {
+for (const name of ["basket", "rekomendacje", "seeyoulater", "ofe", "obszary", "kontakt", "dozobaczenia"]) {
   test(`serve isolated section ${name}`, async () => {
     const response = await worker.fetch(new Request(`https://lukaszszukalski.pl/${name}/?utm_source=test`), env);
     assert.equal(response.status, 200);
@@ -126,7 +126,7 @@ test("canonicalization preserves legacy www paths and unrelated hosts", async ()
 });
 
 test("www origin paths and similarly named paths retain origin behavior", async () => {
-  for (const path of ["/dozobaczenia/", "/rekomendacja/", "/basketball", "/Basket", "/basket-old/", "/assets/logo.png"]) {
+  for (const path of ["/dozobaczenia-test/", "/rekomendacja/", "/basketball", "/Basket", "/basket-old/", "/assets/logo.png"]) {
     const response = await worker.fetch(new Request(`http://www.lukaszszukalski.pl${path}?ref=old`), env);
     assert.equal(response.status, 200);
     assert.equal(await response.text(), `ORIGIN:${path}`);
@@ -171,5 +171,19 @@ test("homepage, areas and contact share an HTTPS apex URL", async () => {
       assert.equal(final.status, 200);
       assert.equal(await final.text(), `ASSET:${to}`);
     }
+  }
+});
+
+test("meeting page and its linked files serve from HTTPS without www and stay noindex", async () => {
+  for (const path of ["/dozobaczenia/", "/dozobaczenia/rodo/", "/dozobaczenia/assets/spotkanie.webp"]) {
+    const target = `https://lukaszszukalski.pl${path}?ref=spotkanie`;
+    const redirect = await worker.fetch(new Request(`http://www.lukaszszukalski.pl${path}?ref=spotkanie`), env);
+    assert.equal(redirect.status, 308);
+    assert.equal(redirect.headers.get("Location"), target);
+
+    const response = await worker.fetch(new Request(target), env);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("X-Robots-Tag"), "noindex, nofollow");
+    assert.equal(await response.text(), `ASSET:${path}`);
   }
 });

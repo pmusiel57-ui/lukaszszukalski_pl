@@ -1,6 +1,6 @@
 // Keep unlisted paths on the existing origin.
 // Add a section here only when its content is ready and its Worker Route is intended.
-export const managedSections = ["basket", "rekomendacje", "seeyoulater", "ofe", "obszary", "kontakt"];
+export const managedSections = ["basket", "rekomendacje", "seeyoulater", "ofe", "obszary", "kontakt", "dozobaczenia"];
 const canonicalSections = new Set(["basket", "obszary", "kontakt"]);
 const apexHost = "lukaszszukalski.pl";
 const wwwHost = `www.${apexHost}`;
@@ -13,7 +13,8 @@ export default {
     );
 
     const isHomepage = url.pathname === "/" || url.pathname === "/index.html";
-    const usesCanonicalUrl = isHomepage || canonicalSections.has(section);
+    const isIndexable = isHomepage || canonicalSections.has(section);
+    const usesCanonicalUrl = isIndexable || section === "dozobaczenia";
 
     // Workers Routes send this subrequest to the existing origin, without recursion.
     if ((!isHomepage && !section) || (url.hostname === wwwHost && !usesCanonicalUrl)) {
@@ -21,7 +22,7 @@ export default {
     }
 
     const commonHeaders = {
-      "X-Robots-Tag": usesCanonicalUrl ? "index, follow" : "noindex, nofollow",
+      "X-Robots-Tag": isIndexable ? "index, follow" : "noindex, nofollow",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Cache-Control": "no-store",

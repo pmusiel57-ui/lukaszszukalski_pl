@@ -10,12 +10,12 @@ Kod stron dla domeny **lukaszszukalski.pl**, przygotowany dla repozytorium `pmus
 | `lukaszszukalski.pl/obszary/` | [public/obszary/index.html](public/obszary/index.html) | Obszary doradztwa |
 | `lukaszszukalski.pl/kontakt/` | [public/kontakt/index.html](public/kontakt/index.html) | Kontakt |
 | `lukaszszukalski.pl/basket/` | [public/basket/index.html](public/basket/index.html) | Strona tymczasowa na Cloudflare |
-| `lukaszszukalski.pl/dozobaczenia/` | [public/dozobaczenia/index.html](public/dozobaczenia/index.html) | Rezerwowy szkic; istniejąca strona działa na dotychczasowym hostingu |
+| `lukaszszukalski.pl/dozobaczenia/` | [public/dozobaczenia/index.html](public/dozobaczenia/index.html) | Potwierdzenie spotkania na Cloudflare |
 | `lukaszszukalski.pl/rekomendacje/` | [public/rekomendacje/index.html](public/rekomendacje/index.html) | Strona tymczasowa na Cloudflare |
 | `lukaszszukalski.pl/seeyoulater/` | [public/seeyoulater/index.html](public/seeyoulater/index.html) | Strona tymczasowa na Cloudflare |
 | `lukaszszukalski.pl/ofe/` | [public/ofe/index.html](public/ofe/index.html) | Strona tymczasowa na Cloudflare |
 
-Plik `public/dozobaczenia/index.html` to szkic. Treść produkcyjną pod `/dozobaczenia/` obsługuje wcześniejszy serwer. Stary adres `/rekomendacja/` (liczba pojedyncza) również pozostaje na wcześniejszym serwerze; `/rekomendacje/` to osobna, nowa podstrona.
+Polityka prywatności dla konfiguratora spotkania jest dostępna pod `/dozobaczenia/rodo/`. Obie strony mają `noindex`. Stary adres `/rekomendacja/` (liczba pojedyncza) również pozostaje na wcześniejszym serwerze; `/rekomendacje/` to osobna, nowa podstrona.
 
 ## Pozostałe pliki
 
@@ -45,8 +45,8 @@ Projekt Cloudflare Workers ma nazwę `lukaszszukalski-strony`. Pliki z `public` 
 
 Worker jest podłączony do następujących tras:
 
-- `lukaszszukalski.pl/*` — strona główna, `/obszary/` i `/kontakt/`
-- `www.lukaszszukalski.pl/*` — przekierowania strony głównej, `/obszary/`, `/kontakt/` i `/basket/` na adres HTTPS bez `www`
+- `lukaszszukalski.pl/*` — strona główna, `/obszary/`, `/kontakt/` i `/dozobaczenia/`
+- `www.lukaszszukalski.pl/*` — przekierowania strony głównej, `/obszary/`, `/kontakt/`, `/basket/` i `/dozobaczenia/` na adres HTTPS bez `www`
 - `lukaszszukalski.pl/basket*`
 - `lukaszszukalski.pl/rekomendacje*`
 - `lukaszszukalski.pl/seeyoulater*`
@@ -80,7 +80,7 @@ Podaj adres podstrony i opisz oczekiwaną zmianę, np. „Na `/basket/` zmień n
 
 GitHub jest miejscem przechowywania źródeł. Cloudflare buduje i publikuje ich wdrożoną kopię; ręczne kopiowanie plików przez panel nie jest potrzebne.
 
-Kod Workera zawiera listę sekcji obsługiwanych przez Cloudflare. Przeniesienie `/dozobaczenia/` wymaga docelowych treści i dodania tej sekcji do listy.
+Kod Workera zawiera listę sekcji obsługiwanych przez Cloudflare.
 
 ## Praca lokalna
 
