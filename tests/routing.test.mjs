@@ -112,12 +112,13 @@ test("HEAD BASKET on HTTP www redirects without a body", async () => {
   assert.equal(await response.text(), "");
 });
 
-test("BASKET canonicalization does not rewrite other sections or unrelated hosts", async () => {
+test("canonicalization preserves legacy www paths and unrelated hosts", async () => {
   for (const name of ["ofe", "rekomendacje", "seeyoulater"]) {
     const requestUrl = `http://www.lukaszszukalski.pl/${name}?q=1`;
     const response = await worker.fetch(new Request(requestUrl), env);
-    assert.equal(response.status, 308);
-    assert.equal(response.headers.get("Location"), `http://www.lukaszszukalski.pl/${name}/?q=1`);
+    assert.equal(response.status, 200);
+    assert.equal(await response.text(), `ORIGIN:/${name}`);
+    assert.equal(response.headers.get("Location"), null);
   }
   const unrelated = await worker.fetch(new Request("https://preview.example/basket?ref=test"), env);
   assert.equal(unrelated.status, 308);
@@ -149,4 +150,26 @@ test("serve contact settings from the same section", async () => {
   const response = await worker.fetch(new Request("https://lukaszszukalski.pl/kontakt/ustawienia.js"), env);
   assert.equal(response.status, 200);
   assert.equal(await response.text(), "ASSET:/kontakt/ustawienia.js");
+});
+
+test("homepage, areas and contact share an HTTPS apex URL", async () => {
+  const query = "?temat=kredyty&utm_source=www";
+  const paths = [
+    ["/", "/"],
+    ["/index.html", "/"],
+    ["/obszary", "/obszary/"],
+    ["/kontakt/", "/kontakt/"],
+    ["/kontakt/ustawienia.js", "/kontakt/ustawienia.js"],
+  ];
+  for (const host of ["http://lukaszszukalski.pl", "http://www.lukaszszukalski.pl", "https://www.lukaszszukalski.pl"]) {
+    for (const [from, to] of paths) {
+      const response = await worker.fetch(new Request(`${host}${from}${query}`), env);
+      const target = `https://lukaszszukalski.pl${to}${query}`;
+      assert.equal(response.status, 308);
+      assert.equal(response.headers.get("Location"), target);
+      const final = await worker.fetch(new Request(target), env);
+      assert.equal(final.status, 200);
+      assert.equal(await final.text(), `ASSET:${to}`);
+    }
+  }
 });

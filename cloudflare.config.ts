@@ -27,7 +27,7 @@ export default defineConfig({
         zone: "lukaszszukalski.pl",
       }),
       triggers.fetch({
-        pattern: "www.lukaszszukalski.pl/basket*",
+        pattern: "www.lukaszszukalski.pl/*",
         zone: "lukaszszukalski.pl",
       }),
       triggers.fetch({

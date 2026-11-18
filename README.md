@@ -46,7 +46,7 @@ Projekt Cloudflare Workers ma nazwę `lukaszszukalski-strony`. Pliki z `public` 
 Worker jest podłączony do następujących tras:
 
 - `lukaszszukalski.pl/*` — strona główna, `/obszary/` i `/kontakt/`
-- `www.lukaszszukalski.pl/basket*`
+- `www.lukaszszukalski.pl/*` — przekierowania strony głównej, `/obszary/`, `/kontakt/` i `/basket/` na adres HTTPS bez `www`
 - `lukaszszukalski.pl/basket*`
 - `lukaszszukalski.pl/rekomendacje*`
 - `lukaszszukalski.pl/seeyoulater*`

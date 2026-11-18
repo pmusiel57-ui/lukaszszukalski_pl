@@ -1,7 +1,9 @@
 // Keep unlisted paths on the existing origin.
 // Add a section here only when its content is ready and its Worker Route is intended.
 export const managedSections = ["basket", "rekomendacje", "seeyoulater", "ofe", "obszary", "kontakt"];
-const indexableSections = new Set(["basket", "obszary", "kontakt"]);
+const canonicalSections = new Set(["basket", "obszary", "kontakt"]);
+const apexHost = "lukaszszukalski.pl";
+const wwwHost = `www.${apexHost}`;
 
 export default {
   async fetch(request, env) {
@@ -11,12 +13,15 @@ export default {
     );
 
     const isHomepage = url.pathname === "/" || url.pathname === "/index.html";
+    const usesCanonicalUrl = isHomepage || canonicalSections.has(section);
 
     // Workers Routes send this subrequest to the existing origin, without recursion.
-    if (!isHomepage && !section) return fetch(request);
+    if ((!isHomepage && !section) || (url.hostname === wwwHost && !usesCanonicalUrl)) {
+      return fetch(request);
+    }
 
     const commonHeaders = {
-      "X-Robots-Tag": isHomepage || indexableSections.has(section) ? "index, follow" : "noindex, nofollow",
+      "X-Robots-Tag": usesCanonicalUrl ? "index, follow" : "noindex, nofollow",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Cache-Control": "no-store",
@@ -28,15 +33,14 @@ export default {
       });
     }
 
-    // The BASKET campaign has one public URL, including when a browser adds www
-    // or opens an HTTP bookmark. Preserve asset paths and campaign query strings.
+    // Preserve asset paths and campaign query strings when normalizing public URLs.
     const canonicalUrl = new URL(url);
     if (
-      section === "basket" &&
-      ["lukaszszukalski.pl", "www.lukaszszukalski.pl"].includes(url.hostname)
+      usesCanonicalUrl &&
+      (url.hostname === apexHost || url.hostname === wwwHost)
     ) {
       canonicalUrl.protocol = "https:";
-      canonicalUrl.hostname = "lukaszszukalski.pl";
+      canonicalUrl.hostname = apexHost;
       canonicalUrl.port = "";
     }
     if (isHomepage) {
