@@ -13,7 +13,7 @@ export default {
     if (!section) return fetch(request);
 
     const commonHeaders = {
-      "X-Robots-Tag": "noindex, nofollow",
+      "X-Robots-Tag": section === "basket" ? "index, follow" : "noindex, nofollow",
       "X-Content-Type-Options": "nosniff",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Cache-Control": "no-store",

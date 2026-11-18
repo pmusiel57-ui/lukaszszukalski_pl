@@ -28,7 +28,7 @@ for (const name of ["basket", "rekomendacje", "seeyoulater", "ofe"]) {
     const response = await worker.fetch(new Request(`https://lukaszszukalski.pl/${name}/?utm_source=test`), env);
     assert.equal(response.status, 200);
     assert.equal(await response.text(), `ASSET:/${name}/`);
-    assert.equal(response.headers.get("X-Robots-Tag"), "noindex, nofollow");
+    assert.equal(response.headers.get("X-Robots-Tag"), name === "basket" ? "index, follow" : "noindex, nofollow");
   });
   test(`canonical slash and UTM ${name}`, async () => {
     for (const path of [`/${name}`, `/${name}/index.html`]) {
