@@ -8,7 +8,7 @@ globalThis.fetch = async (request) => new Response(`ORIGIN:${new URL(request.url
 const env = {
   ASSETS: { fetch: async (request) => {
     const path = new URL(request.url).pathname;
-    const valid = ["/", "/basket/", "/rekomendacje/", "/seeyoulater/", "/ofe/", "/obszary/", "/kontakt/", "/kontakt/ustawienia.js", "/dozobaczenia/", "/dozobaczenia/rodo/", "/dozobaczenia/assets/spotkanie.webp"];
+    const valid = ["/", "/portret-glowny.jpg", "/basket/", "/rekomendacje/", "/seeyoulater/", "/ofe/", "/obszary/", "/kontakt/", "/kontakt/ustawienia.js", "/dozobaczenia/", "/dozobaczenia/rodo/", "/dozobaczenia/assets/spotkanie.webp"];
     return new Response(valid.includes(path) ? `ASSET:${path}` : "Not found", {
       status: valid.includes(path) ? 200 : 404,
       headers: { "Content-Type": "text/html; charset=utf-8" },
@@ -186,4 +186,13 @@ test("meeting page and its linked files serve from HTTPS without www and stay no
     assert.equal(response.headers.get("X-Robots-Tag"), "noindex, nofollow");
     assert.equal(await response.text(), `ASSET:${path}`);
   }
+});
+
+test("serve the homepage portrait at its exact path", async () => {
+  const path = "/portret-glowny.jpg";
+  const response = await worker.fetch(new Request(`https://lukaszszukalski.pl${path}`), env);
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), `ASSET:${path}`);
+  const other = await worker.fetch(new Request(`https://lukaszszukalski.pl${path}/other`), env);
+  assert.equal(await other.text(), `ORIGIN:${path}/other`);
 });

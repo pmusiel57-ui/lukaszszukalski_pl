@@ -13,11 +13,12 @@ export default {
     );
 
     const isHomepage = url.pathname === "/" || url.pathname === "/index.html";
-    const isIndexable = isHomepage || canonicalSections.has(section);
+    const isHomepageImage = url.pathname === "/portret-glowny.jpg";
+    const isIndexable = isHomepage || isHomepageImage || canonicalSections.has(section);
     const usesCanonicalUrl = isIndexable || section === "dozobaczenia";
 
     // Workers Routes send this subrequest to the existing origin, without recursion.
-    if ((!isHomepage && !section) || (url.hostname === wwwHost && !usesCanonicalUrl)) {
+    if ((!isHomepage && !isHomepageImage && !section) || (url.hostname === wwwHost && !usesCanonicalUrl)) {
       return fetch(request);
     }
 
