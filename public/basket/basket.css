@@ -260,11 +260,8 @@
    relying on 100% image heights inside an absolutely positioned <picture>. */
 @media(max-width:760px){
   .hero-portrait{aspect-ratio:auto;min-height:0;height:auto;overflow:visible}
-  .hero-portrait picture{position:relative;inset:auto;display:block;width:100%;height:auto;aspect-ratio:1.24;overflow:hidden;border-radius:25px;background:#e9e3d8}
-  .hero-portrait picture img{display:block;width:100%;height:auto;aspect-ratio:1.24;object-fit:cover;object-position:center 36%}
-}
-@media(max-width:359px){
-  .hero-portrait picture,.hero-portrait picture img{aspect-ratio:1.08}
+  .hero-portrait picture{position:relative;inset:auto;display:block;width:100%;height:auto;aspect-ratio:1;overflow:hidden;border-radius:25px;background:#e9e3d8}
+  .hero-portrait picture img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;object-position:center 36%}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
 @media print{.mobile-contact-bar,.skip-link{display:none!important}.site-footer{color:var(--navy);background:#fff}.hero-portrait{box-shadow:none}.button{box-shadow:none}body{font-size:12pt}.container{width:100%}.hero,.bridge,.strategy,.steps,.contact-section{break-inside:avoid}}
